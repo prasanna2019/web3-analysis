@@ -1,6 +1,8 @@
 from web3 import Web3
 from dotenv import load_dotenv
 import os
+from decimal import Decimal
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -9,7 +11,7 @@ load_dotenv()
 INFURA_PROJECT_ID = os.getenv("INFURA_PROJECT_ID")
 
 # Initialize Web3 connection (Using Infura)
-INFURA_URL = "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID"
+INFURA_URL = "https://mainnet.infura.io/v3/"+INFURA_PROJECT_ID
 w3 = Web3(Web3.HTTPProvider(INFURA_URL))
 
 # Fetch latest Ethereum block transactions
@@ -24,9 +26,9 @@ def get_latest_transactions():
                 "hash": tx.hash.hex(),
                 "from": tx['from'],
                 "to": tx['to'] if tx['to'] else "Contract Creation",
-                "value": w3.from_wei(tx['value'], 'ether'),
-                "gas": tx['gas'],
-                "gasPrice": w3.from_wei(tx['gasPrice'], 'gwei')
+                "value": Decimal(w3.from_wei(tx["value"], "ether")),  # Convert to Decimal
+                "gas": Decimal(tx["gas"]),  # Convert to Decimal
+                "gasPrice": Decimal(w3.from_wei(tx["gasPrice"], "gwei"))  # Convert to Decimal
             })
         
         return tx_list

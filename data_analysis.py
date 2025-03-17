@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, count, sum, avg, max, min
-import json
+from pyspark.sql.types import StructType, StructField, StringType, DecimalType
 from block_data import get_latest_transactions
 
 
@@ -8,16 +8,21 @@ from block_data import get_latest_transactions
 # Get data of latest block
 tx_data = get_latest_transactions()
 if tx_data:
-    with open("transactions.json", "w") as f:
-        json.dump(tx_data, f)
+# Initialize PySpark session
+    spark = SparkSession.builder.appName("Web3PySparkAnalysis").getOrCreate()
 
-    # Initialize PySpark session
-    spark = SparkSession.builder \
-        .appName("Web3PySparkAnalysis") \
-        .getOrCreate()
+    # Define Schema for DataFrame
+    schema = StructType([
+        StructField("hash", StringType(), False),
+        StructField("from", StringType(), False),
+        StructField("to", StringType(), True),
+       StructField("value", DecimalType(38,18), False),  # Large decimal type for ETH values
+    StructField("gas", DecimalType(38,0), False),  # Large integer type for gas
+    StructField("gasPrice", DecimalType(38,18), False)  # Large decimal type for gasPrice
+    ])
 
-    # Load transactions JSON into PySpark DataFrame
-    df = spark.read.json("transactions.json")
+    # Create PySpark DataFrame directly from list of dictionaries
+    df = spark.createDataFrame(tx_data, schema=schema)
 
     # Count transactions per sender
     df_sender_count = df.groupBy("from").agg(count("hash").alias("transaction_count"))
