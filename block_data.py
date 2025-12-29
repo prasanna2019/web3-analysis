@@ -2,17 +2,14 @@ from web3 import Web3
 import pandas as pd
 
 
-# Access API key directly
-INFURA_PROJECT_ID = os.getenv("INFURA_PROJECT_ID")
-
 # Initialize Web3 connection (Using Infura)
-INFURA_URL = "https://mainnet.infura.io/v3/"+INFURA_PROJECT_ID
 
 
 # Fetch latest Ethereum block transactions
-def get_latest_transactions(block= 'latest', infura_url):
+def get_latest_transactions( infura_url, block= 'latest'):
     try:
         w3 = Web3(Web3.HTTPProvider(infura_url))
+        print(w3)
         block = w3.eth.get_block(block, full_transactions=True)
         transactions = block.transactions
         tx_dicts= [dict(tx) for tx in transactions]
