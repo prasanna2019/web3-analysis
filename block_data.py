@@ -1,7 +1,6 @@
 from web3 import Web3
 import pandas as pd
 
-
 # Initialize Web3 connection (Using Infura)
 
 
@@ -9,7 +8,6 @@ import pandas as pd
 def get_latest_transactions( infura_url, block= 'latest'):
     try:
         w3 = Web3(Web3.HTTPProvider(infura_url))
-        print(w3)
         block = w3.eth.get_block(block, full_transactions=True)
         transactions = block.transactions
         tx_dicts= [dict(tx) for tx in transactions]
@@ -22,11 +20,13 @@ def get_latest_transactions( infura_url, block= 'latest'):
         print(f"Error fetching transactions: {e}")
         return []
     
-def get_receipts(tx_hash):
+def get_receipts(tx_hash, infura_url):
+    w3 = Web3(Web3.HTTPProvider(infura_url))
     transaction_receipt= w3.eth.get_transaction_receipt(tx_hash)
-    print(transaction_receipt)
-
-    return
+    tx= dict(transaction_receipt)
+    logs= [dict(t) for t in tx['logs'] ]
+    df= pd.DataFrame(logs)
+    return df
     
 if __name__== '__main__':
     get_latest_transactions()
